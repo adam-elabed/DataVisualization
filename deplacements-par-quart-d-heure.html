@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="stylesheet" href="styles.css" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  
+  <!-- Bootstrap CSS -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+  />
+
+  <!-- Google Fonts -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- D3 -->
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+
+  <link rel="stylesheet" href="styles.css" />
+  <title>Déplacements par quart d'heure</title>
+
+  <style>
+    
+    /* Conteneur principal */
+    #chart-container {
+      width: 100%;
+      margin: 2rem auto;
+    }
+    /* L'élément qui accueillera le SVG D3 */
+    #chart {
+      width: 100%;
+      height: auto;
+      max-width: 1200px;
+      background: #fff;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      padding: 20px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    /* Barres empilées */
+    .bar rect {
+      stroke: #fff;
+      transition: fill 0.2s;
+    }
+    .bar rect:hover {
+      opacity: 0.8;
+    }
+
+    /* Axes */
+    .axis text {
+      font-size: 12px;
+    }
+    .axis path,
+    .axis line {
+      fill: none;
+      stroke: #000;
+      shape-rendering: crispEdges;
+    }
+
+    /* Tooltip */
+    .tooltip {
+      position: absolute;
+      background-color: #ffffff;
+      border: 1px solid #cccccc;
+      padding: 8px;
+      border-radius: 4px;
+      box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+      pointer-events: none;
+      font-size: 12px;
+      opacity: 0;
+      transition: opacity 0.1s;
+    }
+
+  </style>
+</head>
+
+<body>
+    <!-- SECTION NAV -->
+    <div id="navbar-container"></div>
+
+    <!-- SECTION HERO -->
+    <header class="hero">
+      <h1>Déplacements par quart d'heure</h1>
+    </header>
+
+  <!-- SECTION CHART -->
+  <div class="container my-4">
+    <div class="row">
+      <div class="col-12">
+        <div id="chart-container">
+          <div id="chart"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION FOOTER -->
+  <div id="footer-container"></div>
+
+  <script>
+    // Charger la barre de navigation depuis nav.html
+    d3.html("footer.html").then((data) => {
+        // Insérer la navigation dans l'élément avec l'ID "navbar-container"
+        document.getElementById("footer-container").appendChild(data.body.firstChild);
+    });
+  </script>
+
+  <!-- SCRIPT D3 : Stacked Bar Chart -->
+  <script>
+    //------------------------------------------
+    // Données
+    //------------------------------------------
+    const data = [
+      {
+        hour: "12:00",
+        Vélo: 13,
+        Bus: 3,
+        Marche: 130,
+        Moto: 3,
+        Voiture: 31,
+        TrainMétro: 66,
+      },
+      {
+        hour: "12:15",
+        Vélo: 9,
+        Bus: 2,
+        Marche: 128,
+        Moto: 0,
+        Voiture: 32,
+        TrainMétro: 58,
+      },
+      {
+        hour: "12:30",
+        Vélo: 10,
+        Bus: 0,
+        Marche: 112,
+        Moto: 2,
+        Voiture: 35,
+        TrainMétro: 72,
+      },
+      {
+        hour: "12:45",
+        Vélo: 10,
+        Bus: 0,
+        Marche: 115,
+        Moto: 1,
+        Voiture: 32,
+        TrainMétro: 55,
+      },
+      {
+        hour: "13:00",
+        Vélo: 14,
+        Bus: 0,
+        Marche: 134,
+        Moto: 2,
+        Voiture: 36,
+        TrainMétro: 61,
+      },
+      {
+        hour: "13:15",
+        Vélo: 20,
+        Bus: 0,
+        Marche: 126,
+        Moto: 0,
+        Voiture: 27,
+        TrainMétro: 68,
+      },
+      {
+        hour: "13:30",
+        Vélo: 13,
+        Bus: 2,
+        Marche: 118,
+        Moto: 2,
+        Voiture: 49,
+        TrainMétro: 76,
+      },
+      {
+        hour: "13:45",
+        Vélo: 18,
+        Bus: 1,
+        Marche: 122,
+        Moto: 2,
+        Voiture: 43,
+        TrainMétro: 69,
+      },
+      {
+        hour: "14:00",
+        Vélo: 20,
+        Bus: 1,
+        Marche: 117,
+        Moto: 3,
+        Voiture: 44,
+        TrainMétro: 72,
+      },
+      {
+        hour: "14:15",
+        Vélo: 18,
+        Bus: 0,
+        Marche: 119,
+        Moto: 5,
+        Voiture: 35,
+        TrainMétro: 69,
+      },
+      {
+        hour: "14:30",
+        Vélo: 8,
+        Bus: 0,
+        Marche: 119,
+        Moto: 3,
+        Voiture: 31,
+        TrainMétro: 76,
+      },
+      {
+        hour: "14:45",
+        Vélo: 5,
+        Bus: 9,
+        Marche: 130,
+        Moto: 2,
+        Voiture: 47,
+        TrainMétro: 75,
+      },
+      {
+        hour: "15:00",
+        Vélo: 16,
+        Bus: 3,
+        Marche: 129,
+        Moto: 2,
+        Voiture: 41,
+        TrainMétro: 102,
+      },
+      {
+        hour: "15:15",
+        Vélo: 11,
+        Bus: 3,
+        Marche: 141,
+        Moto: 4,
+        Voiture: 35,
+        TrainMétro: 83,
+      },
+      {
+        hour: "15:30",
+        Vélo: 13,
+        Bus: 2,
+        Marche: 160,
+        Moto: 5,
+        Voiture: 43,
+        TrainMétro: 85,
+      },
+      {
+        hour: "15:45",
+        Vélo: 18,
+        Bus: 6,
+        Marche: 149,
+        Moto: 1,
+        Voiture: 35,
+        TrainMétro: 83,
+      },
+      {
+        hour: "16:00",
+        Vélo: 17,
+        Bus: 3,
+        Marche: 164,
+        Moto: 2,
+        Voiture: 51,
+        TrainMétro: 107,
+      },
+      {
+        hour: "16:15",
+        Vélo: 14,
+        Bus: 4,
+        Marche: 172,
+        Moto: 3,
+        Voiture: 56,
+        TrainMétro: 103,
+      },
+      {
+        hour: "16:30",
+        Vélo: 12,
+        Bus: 2,
+        Marche: 137,
+        Moto: 2,
+        Voiture: 38,
+        TrainMétro: 95,
+      },
+      {
+        hour: "16:45",
+        Vélo: 9,
+        Bus: 1,
+        Marche: 180,
+        Moto: 3,
+        Voiture: 41,
+        TrainMétro: 79,
+      },
+      {
+        hour: "17:00",
+        Vélo: 12,
+        Bus: 3,
+        Marche: 186,
+        Moto: 0,
+        Voiture: 52,
+        TrainMétro: 88,
+      },
+      {
+        hour: "17:15",
+        Vélo: 9,
+        Bus: 4,
+        Marche: 175,
+        Moto: 0,
+        Voiture: 40,
+        TrainMétro: 106,
+      },
+      {
+        hour: "17:30",
+        Vélo: 16,
+        Bus: 1,
+        Marche: 159,
+        Moto: 0,
+        Voiture: 44,
+        TrainMétro: 89,
+      },
+      {
+        hour: "17:45",
+        Vélo: 17,
+        Bus: 4,
+        Marche: 157,
+        Moto: 0,
+        Voiture: 45,
+        TrainMétro: 83,
+      },
+      {
+        hour: "18:00",
+        Vélo: 11,
+        Bus: 5,
+        Marche: 135,
+        Moto: 0,
+        Voiture: 40,
+        TrainMétro: 75,
+      },
+      {
+        hour: "18:15",
+        Vélo: 11,
+        Bus: 2,
+        Marche: 109,
+        Moto: 2,
+        Voiture: 32,
+        TrainMétro: 83,
+      },
+      {
+        hour: "18:30",
+        Vélo: 10,
+        Bus: 2,
+        Marche: 129,
+        Moto: 0,
+        Voiture: 45,
+        TrainMétro: 70,
+      },
+      {
+        hour: "18:45",
+        Vélo: 11,
+        Bus: 3,
+        Marche: 132,
+        Moto: 0,
+        Voiture: 35,
+        TrainMétro: 77,
+      },
+      {
+        hour: "19:00",
+        Vélo: 17,
+        Bus: 3,
+        Marche: 116,
+        Moto: 2,
+        Voiture: 34,
+        TrainMétro: 70,
+      },
+      {
+        hour: "19:15",
+        Vélo: 13,
+        Bus: 2,
+        Marche: 124,
+        Moto: 0,
+        Voiture: 41,
+        TrainMétro: 74,
+      },
+      {
+        hour: "19:30",
+        Vélo: 12,
+        Bus: 0,
+        Marche: 81,
+        Moto: 0,
+        Voiture: 25,
+        TrainMétro: 64,
+      },
+      {
+        hour: "19:45",
+        Vélo: 18,
+        Bus: 0,
+        Marche: 78,
+        Moto: 0,
+        Voiture: 27,
+        TrainMétro: 48,
+      },
+      {
+        hour: "20:00",
+        Vélo: 9,
+        Bus: 0,
+        Marche: 68,
+        Moto: 0,
+        Voiture: 33,
+        TrainMétro: 59,
+      },
+      {
+        hour: "20:15",
+        Vélo: 6,
+        Bus: 0,
+        Marche: 62,
+        Moto: 0,
+        Voiture: 29,
+        TrainMétro: 47,
+      },
+      {
+        hour: "20:30",
+        Vélo: 7,
+        Bus: 0,
+        Marche: 67,
+        Moto: 0,
+        Voiture: 37,
+        TrainMétro: 50,
+      },
+      {
+        hour: "20:45",
+        Vélo: 2,
+        Bus: 3,
+        Marche: 69,
+        Moto: 0,
+        Voiture: 20,
+        TrainMétro: 41,
+      },
+      {
+        hour: "21:00",
+        Vélo: 9,
+        Bus: 2,
+        Marche: 71,
+        Moto: 0,
+        Voiture: 34,
+        TrainMétro: 49,
+      },
+      {
+        hour: "21:15",
+        Vélo: 4,
+        Bus: 0,
+        Marche: 58,
+        Moto: 0,
+        Voiture: 27,
+        TrainMétro: 48,
+      },
+      {
+        hour: "21:30",
+        Vélo: 6,
+        Bus: 0,
+        Marche: 61,
+        Moto: 0,
+        Voiture: 31,
+        TrainMétro: 45,
+      },
+      {
+        hour: "21:45",
+        Vélo: 0,
+        Bus: 0,
+        Marche: 65,
+        Moto: 0,
+        Voiture: 26,
+        TrainMétro: 41,
+      },
+      {
+        hour: "22:00",
+        Vélo: 5,
+        Bus: 1,
+        Marche: 47,
+        Moto: 0,
+        Voiture: 32,
+        TrainMétro: 47,
+      },
+      {
+        hour: "22:15",
+        Vélo: 5,
+        Bus: 1,
+        Marche: 39,
+        Moto: 0,
+        Voiture: 32,
+        TrainMétro: 47,
+      },
+      {
+        hour: "22:30",
+        Vélo: 0,
+        Bus: 0,
+        Marche: 45,
+        Moto: 0,
+        Voiture: 30,
+        TrainMétro: 46,
+      },
+      {
+        hour: "22:45",
+        Vélo: 3,
+        Bus: 0,
+        Marche: 41,
+        Moto: 0,
+        Voiture: 22,
+        TrainMétro: 37,
+      },
+      {
+        hour: "23:00",
+        Vélo: 4,
+        Bus: 0,
+        Marche: 32,
+        Moto: 0,
+        Voiture: 20,
+        TrainMétro: 30,
+      },
+      {
+        hour: "23:15",
+        Vélo: 4,
+        Bus: 0,
+        Marche: 51,
+        Moto: 1,
+        Voiture: 20,
+        TrainMétro: 29,
+      },
+      {
+        hour: "23:30",
+        Vélo: 7,
+        Bus: 0,
+        Marche: 119,
+        Moto: 0,
+        Voiture: 29,
+        TrainMétro: 49,
+      },
+      {
+        hour: "23:45",
+        Vélo: 15,
+        Bus: 0,
+        Marche: 81,
+        Moto: 0,
+        Voiture: 28,
+        TrainMétro: 75,
+      },
+      {
+        hour: "00:00",
+        Vélo: 7,
+        Bus: 0,
+        Marche: 61,
+        Moto: 0,
+        Voiture: 35,
+        TrainMétro: 62,
+      },
+      {
+        hour: "00:15",
+        Vélo: 12,
+        Bus: 0,
+        Marche: 56,
+        Moto: 0,
+        Voiture: 39,
+        TrainMétro: 59,
+      },
+      {
+        hour: "00:30",
+        Vélo: 9,
+        Bus: 2,
+        Marche: 43,
+        Moto: 0,
+        Voiture: 43,
+        TrainMétro: 47,
+      },
+      {
+        hour: "00:45",
+        Vélo: 4,
+        Bus: 0,
+        Marche: 36,
+        Moto: 0,
+        Voiture: 37,
+        TrainMétro: 54,
+      },
+      {
+        hour: "01:00",
+        Vélo: 3,
+        Bus: 0,
+        Marche: 28,
+        Moto: 0,
+        Voiture: 37,
+        TrainMétro: 19,
+      },
+      {
+        hour: "01:15",
+        Vélo: 4,
+        Bus: 0,
+        Marche: 18,
+        Moto: 0,
+        Voiture: 34,
+        TrainMétro: 17,
+      },
+      {
+        hour: "01:30",
+        Vélo: 3,
+        Bus: 0,
+        Marche: 19,
+        Moto: 1,
+        Voiture: 28,
+        TrainMétro: 14,
+      },
+      {
+        hour: "01:45",
+        Vélo: 2,
+        Bus: 0,
+        Marche: 13,
+        Moto: 0,
+        Voiture: 15,
+        TrainMétro: 13,
+      },
+      {
+        hour: "02:00",
+        Vélo: 5,
+        Bus: 0,
+        Marche: 16,
+        Moto: 0,
+        Voiture: 16,
+        TrainMétro: 12,
+      }
+    ];
+
+    // Clés : veillez à l’orthographe (accents inclus).
+    const keys = ["Vélo", "Bus", "Marche", "Moto", "Voiture", "TrainMétro"];
+
+    // Configuration des marges
+    const margin = { top: 30, right: 50, bottom: 70, left: 70 };
+
+    // Tooltip unique
+    const tooltip = d3
+      .select("body")
+      .append("div")
+      .attr("class", "tooltip");
+
+    function renderChart() {
+      // Efface l'ancien SVG (si on redessine en cas de resize)
+      d3.select("#chart").select("svg").remove();
+
+      // Largeur du conteneur
+      const containerWidth = document.getElementById("chart").clientWidth;
+      // Hauteur fixe (vous pouvez l'adapter)
+      const containerHeight = 600;
+
+      const width = containerWidth - margin.left - margin.right;
+      const height = containerHeight - margin.top - margin.bottom;
+
+      // Création du SVG
+      const svg = d3
+        .select("#chart")
+        .append("svg")
+        .attr("width", containerWidth)
+        .attr("height", containerHeight)
+        .append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
+
+      // Axes X/Y
+      const x = d3
+        .scaleBand()
+        .domain(data.map((d) => d.hour))
+        .range([0, width])
+        .padding(0.2);
+
+      const y = d3
+        .scaleLinear()
+        .domain([
+          0,
+          d3.max(data, d => d.Vélo + d.Bus + d.Marche + d.Moto + d.Voiture + d.TrainMétro)
+        ])
+        .range([height, 0]);
+
+      // Palette de couleurs
+      const color = d3
+        .scaleOrdinal()
+        .domain(keys)
+        .range(["#66c2a5","#fc8d62","#8da0cb","#e78ac3","#a6d854","#ffd92f"]);
+
+      // Axe X
+      svg
+        .append("g")
+        .attr("class", "axis")
+        .attr("transform", `translate(0,${height})`)
+        .call(d3.axisBottom(x))
+        .selectAll("text")
+        .attr("transform", "rotate(-45)")
+        .style("text-anchor", "end");
+
+      // Axe Y
+      svg
+        .append("g")
+        .attr("class", "axis")
+        .call(d3.axisLeft(y).ticks(10));
+
+      // Construction du "stack"
+      const stackedData = d3.stack().keys(keys)(data);
+
+      // Barres empilées
+      svg
+        .append("g")
+        .selectAll("g")
+        .data(stackedData)
+        .join("g")
+        .attr("fill", d => color(d.key))
+        .attr("class", "bar")
+        .selectAll("rect")
+        .data(d => d)
+        .join("rect")
+        .attr("x", d => x(d.data.hour))
+        .attr("y", d => y(d[1]))
+        .attr("height", d => y(d[0]) - y(d[1]))
+        .attr("width", x.bandwidth())
+        .on("mouseover", (event, d) => {
+          tooltip.style("opacity", 1);
+        })
+        .on("mousemove", (event, d) => {
+          // Récupère la clé (ex: "Vélo") en regardant le parent g
+          const key = d3.select(event.currentTarget.parentNode).datum().key;
+          tooltip
+            .html(`
+              <strong>${d.data.hour}</strong><br/>
+              ${key} : ${d[1] - d[0]}
+            `)
+            .style("left", event.pageX + 10 + "px")
+            .style("top", event.pageY - 10 + "px");
+        })
+        .on("mouseout", () => {
+          tooltip.style("opacity", 0);
+        });
+
+      // Légende
+      const legend = svg
+        .append("g")
+        .attr("transform", `translate(${width - 110}, 0)`);
+
+      keys.forEach((key, i) => {
+        legend
+          .append("rect")
+          .attr("x", 0)
+          .attr("y", i * 20)
+          .attr("width", 15)
+          .attr("height", 15)
+          .attr("fill", color(key));
+
+        legend
+          .append("text")
+          .attr("x", 25)
+          .attr("y", i * 20 + 12)
+          .text(key)
+          .style("font-size", "12px")
+          .attr("alignment-baseline", "middle");
+      });
+    }
+
+    // Premier rendu
+    renderChart();
+
+    // Responsive : redessine lors du redimensionnement
+    window.addEventListener("resize", () => {
+      renderChart();
+    });
+  </script>
+
+  <!-- SCRIPT NAV -->
+  <script>
+    d3.html("nav.html").then((data) => {
+      document.getElementById("navbar-container").appendChild(data.body.firstChild);
+    });
+  </script>
+
+  <!-- Bootstrap JS & Popper.js (optionnel) -->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+</body>
+</html>

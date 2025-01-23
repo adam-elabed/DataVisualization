@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="styles.css" />
+  <title>Fusion - Heures & Kilomètres de voyage</title>
+
+  <!-- Bootstrap CSS -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+  <!-- D3.js -->
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+
+  <style>
+    /* Conteneur pour aligner les deux charts côte à côte */
+    .charts-row {
+      margin: 20px 0;
+    }
+
+    .chart-container {
+      position: relative; /* Permet le positionnement */
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    /* Légendes (centrées) */
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center; /* Aligne verticalement */
+      margin: 10px auto;   /* Permet de centrer la légende dans la page */
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center; /* Aligne la pastille et le texte verticalement */
+      margin: 5px 15px;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .legend-item span:last-of-type {
+      margin-right: 50px; /* Espacement à droite du texte */
+    }
+
+    .legend-item span {
+      display: inline-block;
+      width: 15px;
+      height: 15px;
+      margin-right: 5px;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- SECTION NAV -->
+  <div id="navbar-container"></div>
+
+  <!-- SECTION HERO -->
+  <header class="hero">
+    <h1>Analyse des Temps et Distances de Voyage pour les JO 2024</h1>
+    <p>Comparaison de la répartition des heures de voyage et des distances parcourues (en km).</p>
+  </header>
+
+  <!-- MAIN : on place les deux diagrammes côte à côte -->
+  <main class="container">
+    <div class="row charts-row">
+      <!-- COLONNE 1 : Répartition des heures -->
+      <div class="col-md-6">
+        <h2 class="text-center mt-4">Répartition des Heures de Voyage</h2>
+        <div class="chart-container" id="chartHeures">
+          <!-- Le SVG et la légende seront injectés ici via D3 -->
+        </div>
+      </div>
+
+      <!-- COLONNE 2 : Répartition des km -->
+      <div class="col-md-6">
+        <h2 class="text-center mt-4">Répartition des km de Voyage</h2>
+        <div class="chart-container" id="chartKM">
+          <!-- Le SVG et la légende seront injectés ici via D3 -->
+        </div>
+      </div>
+    </div>
+
+    <div id="legend"></div>
+  </main>
+
+  <!-- SECTION FOOTER -->
+  <div id="footer-container"></div>
+
+  <script>
+    // Charger la barre de navigation depuis nav.html
+    d3.html("footer.html").then((data) => {
+        // Insérer la navigation dans l'élément avec l'ID "navbar-container"
+        document.getElementById("footer-container").appendChild(data.body.firstChild);
+    });
+  </script>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+
+
+  <!-- SCRIPT : Répartition des Heures de Voyage -->
+  <script>
+    // Données pour les heures
+    const dataHeures = [
+      { label: "Vélo", value: 3123, color: "#6AB04C" },
+      { label: "Marche", value: 41259, color: "#27AE60" },
+      { label: "Bus", value: 53, color: "#F39C12" },
+      { label: "Moto", value: 404, color: "#D35400" },
+      { label: "Voiture", value: 23678, color: "#E74C3C" },
+      { label: "Train\\Métro", value: 27966, color: "#2980B9" },
+      { label: "TGV", value: 1442, color: "#85C1E9" },
+      { label: "Inconnu", value: 1426, color: "#BDC3C7" },
+      { label: "Avion", value: 0, color: "#8E44AD" },
+      { label: "Trottinette", value: 30, color: "#16A085" }
+    ];
+  
+    // Nombre total (indicatif)
+    const totalHeures = 183072;        // Pour calculer les pourcentages
+    const totalHeuresAffichage = 6513; // Pour le texte "6513 heures totales"
+    
+    const widthHeures = 400, heightHeures = 400;
+    const radiusHeures = Math.min(widthHeures, heightHeures) / 2;
+  
+    const svgHeures = d3.select("#chartHeures")
+      .append("svg")
+      .attr("width", widthHeures)
+      .attr("height", heightHeures)
+      .append("g")
+      .attr("transform", `translate(${widthHeures / 2}, ${heightHeures / 2})`);
+  
+    // Texte central (pourcentage)
+    const centerTextHeures = svgHeures.append("text")
+      .attr("text-anchor", "middle")
+      .attr("dy", "0em")
+      .style("font-size", "16px")
+      .style("fill", "#555")
+      .text("Total : 100%");
+  
+    // Texte supplémentaire en dessous (heures totales)
+    const centerSubTextHeures = svgHeures.append("text")
+      .attr("text-anchor", "middle")
+      .attr("dy", "1.15em")
+      .style("font-size", "14px")
+      .style("fill", "#777")
+      .text(`${totalHeuresAffichage.toLocaleString()} heures totales`);
+  
+    // Arcs
+    const arcHeures = d3.arc()
+      .innerRadius(radiusHeures / 2)
+      .outerRadius(radiusHeures - 10);
+  
+    const arcHoverHeures = d3.arc()
+      .innerRadius(radiusHeures / 2)
+      .outerRadius(radiusHeures);
+  
+    const pieHeures = d3.pie()
+      .value(d => d.value)
+      .sort(null);
+  
+    svgHeures.selectAll("path")
+      .data(pieHeures(dataHeures))
+      .enter()
+      .append("path")
+      .attr("d", arcHeures)
+      .attr("fill", d => d.data.color)
+      .attr("stroke", "#fff")
+      .attr("stroke-width", 2)
+      .on("mouseover", function (event, d) {
+        d3.select(this)
+          .transition()
+          .duration(200)
+          .attr("d", arcHoverHeures);
+  
+        // Affiche le pourcentage dans le centerText
+        centerTextHeures.text(
+          `${d.data.label}: ${(d.data.value / totalHeures * 100).toFixed(2)}%`
+        );
+        // Affiche la valeur en heures dans le sous-texte
+        centerSubTextHeures.text(`${d.data.value.toLocaleString()} heures`);
+      })
+      .on("mouseout", function () {
+        d3.select(this)
+          .transition()
+          .duration(200)
+          .attr("d", arcHeures);
+  
+        // Remet le texte à 100% et aux heures totales
+        centerTextHeures.text("Total : 100%");
+        centerSubTextHeures.text(`${totalHeuresAffichage.toLocaleString()} heures totales`);
+      })
+      .transition()
+      .ease(d3.easeLinear)
+      .duration(1000)
+      .attrTween("d", function (d) {
+        const interpolate = d3.interpolate({ startAngle: 0, endAngle: 0 }, d);
+        return function (t) {
+          return arcHeures(interpolate(t));
+        };
+      });
+  </script>
+  
+  <!-- SCRIPT : Répartition des KM de Voyage -->
+  <script>
+    // Données pour les kilomètres
+    const dataKM = [
+      { label: "Vélo", value: 1945, color: "#6AB04C" },
+      { label: "Marche", value: 6204, color: "#27AE60" },
+      { label: "Bus", value: 742, color: "#F39C12" },
+      { label: "Moto", value: 637, color: "#D35400" },
+      { label: "Voiture", value: 41597, color: "#E74C3C" },
+      { label: "Train\\Métro", value: 24432, color: "#2980B9" },
+      { label: "TGV", value: 11407, color: "#85C1E9" },
+      { label: "Inconnu", value: 8040, color: "#BDC3C7" },
+      { label: "Avion", value: 4979, color: "#8E44AD" },
+      { label: "Trottinette", value: 30, color: "#16A085" }
+    ];
+  
+    // Somme totale des km
+    const totalKM = dataKM.reduce((acc, d) => acc + d.value, 0);
+    const totalKMAffichage = 183072; // Pour l'affichage "183072 km totaux"
+  
+    const widthKM = 400, heightKM = 400;
+    const radiusKM = Math.min(widthKM, heightKM) / 2;
+  
+    const svgKM = d3.select("#chartKM")
+      .append("svg")
+      .attr("width", widthKM)
+      .attr("height", heightKM)
+      .append("g")
+      .attr("transform", `translate(${widthKM / 2}, ${heightKM / 2})`);
+  
+    // Texte central (pourcentage)
+    const centerTextKM = svgKM.append("text")
+      .attr("text-anchor", "middle")
+      .attr("dy", "0em")
+      .style("font-size", "16px")
+      .style("fill", "#555")
+      .text("Total : 100%");
+  
+    // Texte supplémentaire en dessous (km totaux)
+    const centerSubTextKM = svgKM.append("text")
+      .attr("text-anchor", "middle")
+      .attr("dy", "1.15em")
+      .style("font-size", "14px")
+      .style("fill", "#777")
+      .text(`${totalKMAffichage.toLocaleString()} km totaux`);
+  
+    const arcKM = d3.arc()
+      .innerRadius(radiusKM / 2)
+      .outerRadius(radiusKM - 10);
+  
+    const arcHoverKM = d3.arc()
+      .innerRadius(radiusKM / 2)
+      .outerRadius(radiusKM);
+  
+    const pieKM = d3.pie()
+      .value(d => d.value)
+      .sort(null);
+  
+    svgKM.selectAll("path")
+      .data(pieKM(dataKM))
+      .enter()
+      .append("path")
+      .attr("d", arcKM)
+      .attr("fill", d => d.data.color)
+      .attr("stroke", "#fff")
+      .attr("stroke-width", 2)
+      .on("mouseover", function(event, d) {
+        d3.select(this)
+          .transition()
+          .duration(200)
+          .attr("d", arcHoverKM);
+  
+        // Affiche le pourcentage dans le centerText
+        centerTextKM.text(
+          `${d.data.label}: ${(d.data.value / totalKM * 100).toFixed(2)}%`
+        );
+        // Affiche la valeur en km dans le sous-texte
+        centerSubTextKM.text(`${d.data.value.toLocaleString()} km`);
+      })
+      .on("mouseout", function () {
+        d3.select(this)
+          .transition()
+          .duration(200)
+          .attr("d", arcKM);
+  
+        // Remet le texte à 100% et aux km totaux
+        centerTextKM.text("Total : 100%");
+        centerSubTextKM.text(`${totalKMAffichage.toLocaleString()} km totaux`);
+      })
+      .transition()
+      .ease(d3.easeLinear)
+      .duration(1000)
+      .attrTween("d", function(d) {
+        const interpolate = d3.interpolate({ startAngle: 0, endAngle: 0 }, d);
+        return function(t) {
+          return arcKM(interpolate(t));
+        };
+      });
+  
+    // Légende (KM)
+    const legendKM = d3.select("#legend")
+      .append("div")
+      .attr("class", "legend");
+  
+    dataKM.forEach(d => {
+      const item = legendKM.append("div").attr("class", "legend-item");
+      item.append("span").style("background-color", d.color);
+      item.append("span").text(d.label);
+    });
+  </script>
+
+  <!-- SCRIPT NAV -->
+  <script>
+    // Charger la barre de navigation depuis nav.html
+    d3.html("nav.html").then((data) => {
+        // Insérer la navigation dans l'élément avec l'ID "navbar-container"
+        document.getElementById("navbar-container").appendChild(data.body.firstChild);
+    });
+  </script>
+</body>
+</html>

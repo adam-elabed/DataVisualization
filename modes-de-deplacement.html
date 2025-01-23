@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="styles.css" />
+  <title>Interactive Chart (Bar/Line + Brush Sync) - Export PNG/JPEG</title>
+
+  <!-- Bootstrap CSS -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+
+  <!-- D3.js -->
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+
+  <style>
+    /* Forcer un fond blanc (au cas où) */
+    html {
+      background-color: #fff;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Conteneur principal du chart */
+    #chart-container {
+      max-width: 900px;
+      margin: 20px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Barre d'outils */
+    .toolbar {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    .toolbar button {
+      font-size: 0.875rem;
+      padding: 5px 10px;
+      border-radius: 4px;
+      border: none;
+      transition: background-color 0.2s ease;
+    }
+    .toolbar button:hover {
+      opacity: 0.9;
+    }
+
+    /* Tooltip */
+    .tooltip-d3 {
+      position: absolute;
+      pointer-events: none;
+      background: white;
+      border: 1px solid #ccc;
+      padding: 8px;
+      border-radius: 4px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      font-size: 0.875rem;
+      color: #333;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    /* Modale DataView */
+    .modal-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 600px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #ddd;
+      margin-bottom: 10px;
+    }
+    .modal-header h5 {
+      margin: 0;
+    }
+    .modal-header .btn-close {
+      background: none;
+      border: none;
+      font-size: 1.25rem;
+      cursor: pointer;
+    }
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    /* Brush area */
+    #brush-area {
+      margin-top: 20px;
+    }
+
+    /* Axes */
+    .axis text {
+      font-size: 12px;
+    }
+    .axis path,
+    .axis line {
+      stroke: #ccc;
+    }
+
+    /* Bars */
+    .bar rect {
+      stroke: white;
+    }
+
+    /* Responsive SVG */
+    svg {
+      display: block;
+      margin: 0 auto;
+      max-width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SECTION NAV -->
+  <div id="navbar-container"></div>
+
+  <!-- SECTION HERO -->
+  <header class="hero">
+    <h1>Répartition des Voyages par Mode</h1>
+  </header>
+
+<div id="chart-container">
+
+  <!-- Barre d’outils -->
+  <div class="toolbar">
+    <button id="toggle-chart" class="btn btn-sm btn-primary">
+      Basculer Bar/Line
+    </button>
+    <button id="open-data-view" class="btn btn-sm btn-warning">
+      DataView
+    </button>
+    <button id="restore-btn" class="btn btn-sm btn-secondary">
+      Restore
+    </button>
+    <!-- Deux boutons distincts pour l’export -->
+    <button id="save-as-png" class="btn btn-sm btn-success">
+      Save as PNG
+    </button>
+    <button id="save-as-jpeg" class="btn btn-sm btn-success">
+      Save as JPEG
+    </button>
+  </div>
+
+  <!-- SVG principal -->
+  <svg id="chart" width="800" height="400"></svg>
+
+  <!-- Zone brush (pour dataZoom) -->
+  <div id="brush-area">
+    <svg id="brush-svg" width="800" height="80"></svg>
+  </div>
+
+  <!-- Tooltip -->
+  <div id="tooltip" class="tooltip-d3"></div>
+</div>
+
+<!-- Modale pour DataView -->
+<div class="modal-bg" id="data-view-modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h5>Modifier les données</h5>
+      <button class="btn-close" id="close-data-view"></button>
+    </div>
+    <textarea
+      id="data-textarea"
+      rows="10"
+      style="width: 100%; font-family: monospace; white-space: pre;"
+    ></textarea>
+    <div class="modal-footer">
+      <button class="btn btn-primary" id="apply-data">Appliquer</button>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION FOOTER -->
+<div id="footer-container"></div>
+
+<script>
+  // Charger la barre de navigation depuis nav.html
+  d3.html("footer.html").then((data) => {
+      // Insérer la navigation dans l'élément avec l'ID "navbar-container"
+      document.getElementById("footer-container").appendChild(data.body.firstChild);
+  });
+</script>
+
+
+<!-- Bootstrap JS (optionnel) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  // Données initiales
+  let data = [
+    { mode: "Vélo", voyages: 567 },
+    { mode: "Bus", voyages: 156 },
+    { mode: "Marche", voyages: 5058 },
+    { mode: "TGV", voyages: 84 },
+    { mode: "Moto", voyages: 92 },
+    { mode: "Voiture", voyages: 3061 },
+    { mode: "Avion", voyages: 17 },
+    { mode: "Train/Métro", voyages: 4204 },
+    { mode: "Trottinette", voyages: 10 },
+    { mode: "Inconnu", voyages: 186 },
+  ];
+
+  // Dimensions principales
+  const margin = { top: 40, right: 30, bottom: 50, left: 70 };
+  const w = 800, h = 400;
+  const innerWidth = w - margin.left - margin.right;
+  const innerHeight = h - margin.top - margin.bottom;
+
+  // Sélection du SVG principal
+  const svg = d3.select("#chart");
+  const chartG = svg.append("g")
+    .attr("transform", `translate(${margin.left},${margin.top})`);
+
+  // Échelles X / Y
+  let x = d3.scaleBand()
+    .domain(data.map(d => d.mode))
+    .range([0, innerWidth])
+    .padding(0.2);
+
+  let y = d3.scaleLinear()
+    .domain([0, d3.max(data, d => d.voyages)])
+    .nice()
+    .range([innerHeight, 0]);
+
+  // Axes
+  const xAxis = d3.axisBottom(x).tickSizeOuter(0);
+  const yAxis = d3.axisLeft(y);
+
+  // Groupes axes
+  chartG.append("g")
+    .attr("class", "x-axis")
+    .attr("transform", `translate(0, ${innerHeight})`)
+    .call(xAxis)
+    .selectAll("text")
+    .attr("transform", "rotate(30)")
+    .style("text-anchor", "start")
+    .style("font-size", "12px");
+
+  chartG.append("g")
+    .attr("class", "y-axis")
+    .call(yAxis);
+
+  // Group principal pour nos barres / points / line
+  const seriesGroup = chartG.append("g").attr("class", "series-group");
+
+  // État : bar ou line
+  let currentType = "bar";
+
+  // Tooltip
+  const tooltip = d3.select("#tooltip");
+
+  // --- FONCTION DE DESSIN (CHART PRINCIPAL) ---
+  function drawChart() {
+    // On récupère la liste filtrée : uniquement les catégories dans x.domain()
+    const domainSet = new Set(x.domain());
+    const visibleData = data.filter(d => domainSet.has(d.mode));
+
+    // Supprime barres & lignes existantes
+    seriesGroup.selectAll("rect").remove();
+    seriesGroup.selectAll(".line-path").remove();
+    seriesGroup.selectAll(".line-circle").remove();
+
+    if (currentType === "bar") {
+      // BARCHART
+      seriesGroup.selectAll(".bar")
+        .data(visibleData, d => d.mode)
+        .enter()
+        .append("rect")
+        .attr("class", "bar")
+        .attr("x", d => x(d.mode))
+        .attr("width", x.bandwidth())
+        .attr("fill", (d, i) => {
+          const colors = [
+            '#5470C6','#91CC75','#EE6666','#FAC858',
+            '#73C0DE','#3BA272','#FC8452','#9A60B4',
+            '#EA7CCC','#FF9F7F'
+          ];
+          return colors[i % colors.length];
+        })
+        .transition()
+        .duration(300)
+        .attr("y", d => y(d.voyages))
+        .attr("height", d => y(0) - y(d.voyages));
+
+    } else {
+      // LINECHART
+      const line = d3.line()
+        .x(d => x(d.mode) + x.bandwidth() / 2)
+        .y(d => y(d.voyages));
+
+      seriesGroup.append("path")
+        .datum(visibleData)
+        .attr("class", "line-path")
+        .attr("fill", "none")
+        .attr("stroke", "#5470C6")
+        .attr("stroke-width", 2)
+        .transition()
+        .duration(300)
+        .attr("d", line);
+
+      // Points
+      seriesGroup.selectAll(".line-circle")
+        .data(visibleData, d => d.mode)
+        .enter()
+        .append("circle")
+        .attr("class", "line-circle")
+        .attr("r", 4)
+        .attr("fill", "#5470C6")
+        .transition()
+        .duration(300)
+        .attr("cx", d => x(d.mode) + x.bandwidth() / 2)
+        .attr("cy", d => y(d.voyages));
+    }
+  }
+
+  // DESSIN INITIAL
+  drawChart();
+
+  // Gestion du survol (tooltip)
+  svg.on("mousemove", (event) => {
+    const [mx, my] = d3.pointer(event, svg.node());
+    if (mx < margin.left || mx > (margin.left + innerWidth)
+        || my < margin.top || my > (margin.top + innerHeight)) {
+      tooltip.style("opacity", 0);
+      return;
+    }
+
+    // Trouver la catégorie la plus proche
+    const domain = x.domain();
+    let closest = null;
+    let minDist = Infinity;
+    domain.forEach(modeVal => {
+      const center = x(modeVal) + x.bandwidth()/2 + margin.left;
+      const dist = Math.abs(center - mx);
+      if (dist < minDist) {
+        minDist = dist;
+        closest = modeVal;
+      }
+    });
+    const datum = data.find(d => d.mode === closest);
+    if (!datum) {
+      tooltip.style("opacity", 0);
+      return;
+    }
+
+    const total = d3.sum(data, d => d.voyages);
+    const pc = ((datum.voyages / total) * 100).toFixed(2);
+
+    tooltip.html(`
+      <strong>${datum.mode}</strong><br/>
+      ${datum.voyages} voyages (${pc}%)
+    `);
+    const ttNode = tooltip.node();
+    const tooltipWidth = ttNode.offsetWidth;
+    const tooltipHeight = ttNode.offsetHeight;
+
+    tooltip.style("left", (event.pageX - tooltipWidth/2) + "px")
+      .style("top", (event.pageY - tooltipHeight - 10) + "px")
+      .style("opacity", 1);
+  })
+  .on("mouseleave", () => {
+    tooltip.style("opacity", 0);
+  });
+
+  // --- BRUSH (zoom) ---
+  const brushMargin = { top: 10, right: 30, bottom: 20, left: 70 };
+  const brushW = 800, brushH = 80;
+  const brushInnerW = brushW - brushMargin.left - brushMargin.right;
+  const brushInnerH = brushH - brushMargin.top - brushMargin.bottom;
+
+  const brushSvg = d3.select("#brush-svg");
+  const brushG = brushSvg.append("g")
+    .attr("transform", `translate(${brushMargin.left},${brushMargin.top})`);
+
+  let xBrush = d3.scaleBand()
+    .domain(x.domain())
+    .range([0, brushInnerW])
+    .padding(0.2);
+
+  let yBrush = d3.scaleLinear()
+    .domain(y.domain())
+    .range([brushInnerH, 0]);
+
+  function drawBrushChart() {
+    // Nettoyage
+    brushG.selectAll(".brush-bar").remove();
+    brushG.selectAll(".brush-line-path").remove();
+    brushG.selectAll(".brush-line-circle").remove();
+
+    if (currentType === "bar") {
+      // Petites barres grises
+      brushG.selectAll(".brush-bar")
+        .data(data)
+        .enter()
+        .append("rect")
+        .attr("class", "brush-bar")
+        .attr("x", d => xBrush(d.mode))
+        .attr("width", xBrush.bandwidth())
+        .attr("y", d => yBrush(d.voyages))
+        .attr("height", d => brushInnerH - yBrush(d.voyages))
+        .attr("fill", "#ccc");
+    } else {
+      // Mini line chart grisée
+      const lineBrush = d3.line()
+        .x(d => xBrush(d.mode) + xBrush.bandwidth()/2)
+        .y(d => yBrush(d.voyages));
+
+      brushG.append("path")
+        .datum(data)
+        .attr("class", "brush-line-path")
+        .attr("fill", "none")
+        .attr("stroke", "#ccc")
+        .attr("stroke-width", 2)
+        .attr("d", lineBrush);
+
+      brushG.selectAll(".brush-line-circle")
+        .data(data)
+        .enter()
+        .append("circle")
+        .attr("class", "brush-line-circle")
+        .attr("r", 3)
+        .attr("fill", "#ccc")
+        .attr("cx", d => xBrush(d.mode) + xBrush.bandwidth()/2)
+        .attr("cy", d => yBrush(d.voyages));
+    }
+  }
+
+  // Dessin initial du mini-graphe
+  drawBrushChart();
+
+  // Axe X mini
+  const xAxisBrush = d3.axisBottom(xBrush).tickSizeOuter(0);
+  brushG.append("g")
+    .attr("class", "x-axis-brush")
+    .attr("transform", `translate(0, ${brushInnerH})`)
+    .call(xAxisBrush)
+    .selectAll("text")
+    .attr("transform", "rotate(30)")
+    .style("text-anchor", "start");
+
+  // Ajouter le brush
+  const myBrush = d3.brushX()
+    .extent([[0, 0], [brushInnerW, brushInnerH]])
+    .on("brush end", brushed);
+
+  brushG.append("g")
+    .attr("class", "brush")
+    .call(myBrush);
+
+  function brushed({ selection }) {
+    if (!selection) return;
+    const [x0, x1] = selection;
+
+    const selectedDomain = xBrush.domain().filter(mode => {
+      const center = xBrush(mode) + xBrush.bandwidth()/2;
+      return center >= x0 && center <= x1;
+    });
+
+    if (selectedDomain.length > 0) {
+      x.domain(selectedDomain);
+      updateScalesAndRedraw();
+    }
+  }
+
+  function updateScalesAndRedraw() {
+    x.range([0, innerWidth]).padding(0.2);
+    chartG.select(".x-axis")
+      .call(xAxis.scale(x))
+      .selectAll("text")
+      .attr("transform", "rotate(30)")
+      .style("text-anchor", "start");
+
+    y.domain([0, d3.max(data, d => d.voyages)]).nice();
+    chartG.select(".y-axis")
+      .call(yAxis.scale(y));
+
+    drawChart();
+  }
+
+  // --- EXPORT SVG -> IMAGES ---
+
+  // 1) Export en PNG (fond transparent ou lissé)
+  function exportSvgAsPng(svgElement, pngFileName) {
+    const svgString = new XMLSerializer().serializeToString(svgElement);
+
+    const width = svgElement.getAttribute("width");
+    const height = svgElement.getAttribute("height");
+
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const context = canvas.getContext("2d");
+
+    // Convertit la chaîne SVG en DataURL
+    const img = new Image();
+    const svgBase64 = btoa(unescape(encodeURIComponent(svgString)));
+    img.src = "data:image/svg+xml;base64," + svgBase64;
+
+    img.onload = function() {
+      context.drawImage(img, 0, 0);
+      const pngDataUrl = canvas.toDataURL("image/png");
+
+      const downloadLink = document.createElement("a");
+      downloadLink.href = pngDataUrl;
+      downloadLink.download = pngFileName;
+      downloadLink.click();
+    };
+  }
+
+  // 2) Export en JPEG (fond blanc)
+  function exportSvgAsJpeg(svgElement, jpegFileName) {
+    const svgString = new XMLSerializer().serializeToString(svgElement);
+
+    const width = svgElement.getAttribute("width");
+    const height = svgElement.getAttribute("height");
+
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const context = canvas.getContext("2d");
+
+    // Remplit avec du blanc avant de dessiner
+    context.fillStyle = "#FFFFFF";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+    const img = new Image();
+    const svgBase64 = btoa(unescape(encodeURIComponent(svgString)));
+    img.src = "data:image/svg+xml;base64," + svgBase64;
+
+    img.onload = function() {
+      context.drawImage(img, 0, 0);
+      const jpegDataUrl = canvas.toDataURL("image/jpeg", 0.95);
+
+      const downloadLink = document.createElement("a");
+      downloadLink.href = jpegDataUrl;
+      downloadLink.download = jpegFileName;
+      downloadLink.click();
+    };
+  }
+
+  // --- BOUTONS ---
+
+  // 1) Toggle chart type
+  d3.select("#toggle-chart").on("click", () => {
+    currentType = (currentType === "bar") ? "line" : "bar";
+    drawChart();
+    drawBrushChart();
+  });
+
+  // 2) DataView (édition JSON)
+  const dataModal = d3.select("#data-view-modal");
+  const dataTextarea = d3.select("#data-textarea");
+  const openDataViewBtn = d3.select("#open-data-view");
+  const closeDataViewBtn = d3.select("#close-data-view");
+  const applyDataBtn = d3.select("#apply-data");
+
+  openDataViewBtn.on("click", () => {
+    dataTextarea.node().value = JSON.stringify(data, null, 2);
+    dataModal.style("display", "flex");
+  });
+  closeDataViewBtn.on("click", () => {
+    dataModal.style("display", "none");
+  });
+
+  applyDataBtn.on("click", () => {
+    try {
+      const newData = JSON.parse(dataTextarea.node().value);
+      if (!Array.isArray(newData)) throw new Error("Le JSON doit être un tableau.");
+      // Met à jour data
+      data = newData;
+
+      // Met à jour le domain principal
+      x.domain(data.map(d => d.mode));
+      y.domain([0, d3.max(data, d => d.voyages)]).nice();
+
+      // Met à jour la zone brush
+      xBrush.domain(x.domain());
+      yBrush.domain(y.domain());
+
+      // Réinitialise le mini-barchart
+      brushG.selectAll(".brush-bar").remove();
+      brushG.selectAll(".brush-line-path").remove();
+      brushG.selectAll(".brush-line-circle").remove();
+      drawBrushChart();
+
+      // Rafraîchit l'axe X mini
+      brushG.select(".x-axis-brush").remove();
+      brushG.append("g")
+        .attr("class", "x-axis-brush")
+        .attr("transform", `translate(0, ${brushInnerH})`)
+        .call(d3.axisBottom(xBrush).tickSizeOuter(0))
+        .selectAll("text")
+        .attr("transform", "rotate(30)")
+        .style("text-anchor", "start");
+
+      // Supprime la sélection brush
+      brushG.select(".brush").call(myBrush.move, null);
+
+      // Ferme la modale
+      dataModal.style("display", "none");
+
+      // Redessine le chart principal
+      updateScalesAndRedraw();
+    } catch (e) {
+      alert("Erreur de parsing JSON : " + e.message);
+    }
+  });
+
+  // 3) Restore (réinitialise zoom & type)
+  d3.select("#restore-btn").on("click", () => {
+    x.domain(data.map(d => d.mode));
+    y.domain([0, d3.max(data, d => d.voyages)]).nice();
+    brushG.select(".brush").call(myBrush.move, null);
+
+    // Re-bascule en bar
+    currentType = "bar";
+    drawBrushChart();
+    updateScalesAndRedraw();
+  });
+
+  // 4) Deux boutons séparés pour l'export
+  //  - Export PNG
+  d3.select("#save-as-png").on("click", () => {
+    const svgElement = document.getElementById("chart");
+    exportSvgAsPng(svgElement, "chart.png");
+  });
+
+  //  - Export JPEG
+  d3.select("#save-as-jpeg").on("click", () => {
+    const svgElement = document.getElementById("chart");
+    exportSvgAsJpeg(svgElement, "chart.jpg");
+  });
+</script>
+
+  <!-- SCRIPT NAV -->
+  <script>
+    // Charger la barre de navigation depuis nav.html
+    d3.html("nav.html").then((data) => {
+        // Insérer la navigation dans l'élément avec l'ID "navbar-container"
+        document.getElementById("navbar-container").appendChild(data.body.firstChild);
+    });
+  </script>
+</body>
+</html>

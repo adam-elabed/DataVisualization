@@ -1,0 +1,66 @@
+/* ========== Base Styles ========== */
+
+body {
+  font-family: "Arial", sans-serif;
+  background-color: #f9f9fc;
+  color: #333;
+  margin: 0;
+  padding: 0;
+}
+
+/*
+h2 {
+  text-align: center;
+  font-weight: 600;
+  color: #333;
+  margin-top: 20px;
+}
+*/
+/* ========== Hero Section ========== */
+.hero {
+  text-align: center;
+  padding: 30px;
+  background: linear-gradient(to right, #6a11cb, #2575fc);
+  color: white;  color: white;
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+  margin-bottom: 30px;
+}
+.hero h1 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+/* ========== Navbar ========== */
+.navbar {
+  margin-bottom: 0; /* Supprime l'espace entre la navbar et la hero */
+}
+
+.navbar .nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.2); /* Effet survol subtil */
+  transition: background-color 0.3s ease; /* Animation fluide */
+}
+
+#myNavbar {
+  background-color: #000 !important; /* Fond noir personnalisé */
+  color: #fff; /* Texte blanc pour un contraste élevé */
+}
+
+/* ========== Container ========== */
+.container {
+  margin-top: 15px;
+}
+
+/* ========== Footer ========== */
+footer {
+  margin-top: 40px;
+  text-align: center;
+  padding: 10px 0;
+  border-top: 1px solid #dedede;
+
+  background-color: #f8f9fa;  /* Légère couleur de fond */
+  color: #555; /* Texte plus doux */
+  font-size: 14px;
+}
