@@ -2,7 +2,7 @@
 
 ### Équipe :
 
-- Adem El Abed
+- Adam El Abed
 - Hayet Danoun
 - Hawa Fofana
 - Selma Koudia
@@ -21,10 +21,14 @@
 - **Objectif** : Visualiser les données personnelles issues de Google Maps.
 - **Problème rencontré** : Données indisponibles en raison de l’absence d’activation de la sauvegarde des trajets sur Google Maps.
 
+![Aperçu des Visualisations](images/1.png)
+
 ### Redéfinition du sujet :
 
 - **Nouveau sujet** : Visualisation des flux de mobilité pendant les Jeux Olympiques Paris 2024.
 - **Contexte** : Les Jeux Olympiques posent des défis uniques en termes de gestion de la mobilité et des infrastructures de transport en Île-de-France.
+
+![Aperçu des Visualisations](images/2.png)
 
 ### Recherche et collecte des données :
 
@@ -51,6 +55,8 @@
 - **Prototypage** :
   - Création d’une carte statique des sites olympiques avec Leaflet.
   - Préparation de données manuelles pour tester des visualisations préliminaires.
+
+![Aperçu des Visualisations](images/4.png)
 
 ---
 
@@ -79,7 +85,7 @@
   - Optimisation des interactions en limitant le nombre d’éléments visibles.
   - Mise en place de filtres temporels et géographiques pour améliorer la fluidité.
 
----
+## ![Aperçu des Visualisations](images/6.png)
 
 ## **Phase 3 : Finalisation et documentation (06/01/2025 – 24/01/2025)**
 
@@ -93,6 +99,8 @@
   - Sliders temporels pour visualiser les flux de mobilité à différentes périodes.
   - Cartes thermiques des zones saturées pendant les heures de pointe.
   - Graphiques dynamiques avec zoom et mise à jour en temps réel via JSON.
+
+![Aperçu des Visualisations](images/3.png)
 
 ### Documentation et présentation :
 
@@ -136,3 +144,9 @@
 
 - Intégrer de nouvelles données lorsque disponibles via des API officielles.
 - Étendre le projet à d’autres aspects des Jeux Olympiques (logistique, hébergement, etc.).
+
+---
+
+```
+
+```
