@@ -78,7 +78,7 @@ This project aims to leverage data visualization techniques to address the chall
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-repo/datavisualization-jo2024.git
+   git clone https://github.com/IIIAdamIII/DataVisualization.git
    ```
 2. Open `index.html` in your browser to explore the visualizations.
 3. Navigate through different sections using the top navigation bar.
