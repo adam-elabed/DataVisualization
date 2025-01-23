@@ -70,7 +70,7 @@ This project aims to leverage data visualization techniques to address the chall
 
 ## Image Preview
 
-![Visualization Overview](assets/project-preview.png)
+![Visualization Overview](gallery/17-teaser.png)
 
 ---
 
