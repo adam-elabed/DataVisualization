@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
+  <head>
     <meta charset="UTF-8" />
     <link rel="stylesheet" href="styles.css" />
     <title>Synthèse Datavisualisation JO 2024</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-      
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <!-- Bootstrap CSS -->
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
@@ -23,131 +23,230 @@
         font-weight: bold;
       }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <!-- SECTION NAV -->
     <div id="navbar-container"></div>
 
     <!-- SECTION HERO -->
     <header class="hero">
-        <h1>Synthèse : Datavisualisation et Jeux Olympiques 2024</h1>
+      <h1>Synthèse : Datavisualisation et Jeux Olympiques 2024</h1>
     </header>
 
     <main class="container mt-4">
-        <section>
-            <h2>Contexte et Objectifs</h2>
-            <p>
-                Les Jeux Olympiques et Paralympiques de Paris 2024 représentent une opportunité unique de mettre en lumière les défis liés à la gestion des infrastructures de transport en Île-de-France. 
-                Le projet de datavisualisation présenté a pour ambition de :
-            </p>
+      <section>
+        <h2>Contexte et Objectifs</h2>
+        <p>
+          Les Jeux Olympiques et Paralympiques de Paris 2024 représentent une
+          opportunité unique de mettre en lumière les défis liés à la gestion
+          des infrastructures de transport en Île-de-France. Le projet de
+          datavisualisation présenté a pour ambition de :
+        </p>
+        <ul>
+          <li>
+            Identifier les zones de forte densité de trafic et les heures de
+            pointe.
+          </li>
+          <li>
+            Aider habitants et visiteurs à mieux planifier leurs déplacements.
+          </li>
+          <li>
+            Soutenir les gestionnaires des transports publics dans leur prise de
+            décision.
+          </li>
+          <li>Promouvoir des solutions de mobilité durable.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Contenus et Visualisations</h2>
+        <ol>
+          <li>
+            <strong>Analyse des Heures et Distances de Voyage</strong><br />
+            Dans <em>temps-et-distance-de-voyage.html</em>, deux diagrammes en
+            <span class="gras">donut</span> (réalisés avec
+            <span class="gras">D3.js</span>) comparent la répartition :
             <ul>
-                <li>Identifier les zones de forte densité de trafic et les heures de pointe.</li>
-                <li>Aider habitants et visiteurs à mieux planifier leurs déplacements.</li>
-                <li>Soutenir les gestionnaires des transports publics dans leur prise de décision.</li>
-                <li>Promouvoir des solutions de mobilité durable.</li>
+              <li>des <span class="gras">heures de voyage</span>,</li>
+              <li>des <span class="gras">kilomètres totaux</span>.</li>
             </ul>
-        </section>
+            Un survol dynamique permet d'afficher le pourcentage et la valeur de
+            chaque catégorie (Vélo, Marche, Bus, etc.). Le code illustre
+            l'utilisation d'<code>d3.pie</code>, d'arcs hover (en agrandissant
+            le rayon) et de <span class="gras">transitions</span> pour
+            l'animation.
+          </li>
+          <br />
+          <li>
+            <strong>Carte Interactive (Leaflet)</strong><br />
+            Présentée dans <em>carte-interactive.html</em>, cette carte utilise
+            un fichier GeoJSON (<em>geoFrance.json</em>) pour visualiser les
+            contours d'une zone en France. Les données de saturation sont
+            intégrées dynamiquement pour afficher la congestion.
+          </li>
+          <br />
+          <li>
+            <strong>Bar Charts et Graphiques Dynamiques</strong><br />
+            Les fichiers comme <em>modes-de-deplacement.html</em>,
+            <em>deplacements-par-quart-d-heure.html</em> offrent des
+            visualisations interactives : graphiques en barres, lignes, ou même
+            combinaison des deux. <br />
+            <br />
+            Dans <em>modes-de-deplacement.html</em>, nous avons les
+            fonctionnalités supplémantaires suivantes : - Les
+            <span class="gras">fonctions de zoom/brush</span> (mise en œuvre
+            avec <code>d3.brush</code>) permettent de se focaliser sur une plage
+            de catégories ou de données.<br />
+            - Un bouton <span class="gras">« Basculer Bar/Line »</span> commute
+            l'affichage entre un bar chart et un line chart, en temps réel.
+            <br />
+            - Un module <span class="gras">DataView</span> (fenêtre modale)
+            autorise l'<span class="gras">édition dynamique</span> des données
+            au format JSON ; le graphique se met alors à jour instantanément.
+            <br />
+            - L'<span class="gras">export d'images</span> se fait directement
+            depuis le <code>svg</code> en <span class="gras">PNG</span> ou en
+            <span class="gras">JPEG</span> (avec un fond blanc).
+          </li>
+          <br />
+          <li>
+            <strong>Analyses de Transport et Saturation</strong><br />
+            Le fichier <em>saturation-des-transports.html</em> mettent en avant
+            la saturation des transports en Île-de-France avec des
+            visualisations exploitant D3.js pour créer des cartes thermiques.
+            Des <span class="gras">curseurs</span> (sliders) ou zones de
+            <span class="gras">brush</span> peuvent être utilisés pour filtrer
+            les données dans le temps.
+          </li>
+          <br />
+          <li>
+            <strong>Navigation et Footer</strong><br />
+            L'intergration des fichiers <em>nav.html</em> et
+            <em>footer.html</em> proposent une interface de navigation cohérente
+            reliant les différentes visualisations. L'expérience utilisateur est
+            ainsi unifiée. L'intergration du fichier <em>nav.html</em> aide à
+            passer aisément d'une vue à une autre.
+          </li>
+        </ol>
+      </section>
 
-        <section>
-            <h2>Contenus et Visualisations</h2>
-            <ol>
-                <li>
-                    <strong>Analyse des Heures et Distances de Voyage</strong><br>
-                    Dans <em>temps-et-distance-de-voyage.html</em>, deux diagrammes en <span class="gras">donut</span> (réalisés avec <span class="gras">D3.js</span>) comparent la répartition :
-                    <ul>
-                      <li>des <span class="gras">heures de voyage</span>,</li>
-                      <li>des <span class="gras">kilomètres totaux</span>.</li>
-                    </ul>
-                    Un survol dynamique permet d'afficher le pourcentage et la valeur de chaque catégorie (Vélo, Marche, Bus, etc.). Le code illustre l'utilisation d'<code>d3.pie</code>, d'arcs hover (en agrandissant le rayon) et de <span class="gras">transitions</span> pour l'animation.
-                </li>
-                <br>
-                <li>
-                    <strong>Carte Interactive (Leaflet)</strong><br>
-                    Présentée dans <em>carte-interactive.html</em>, cette carte utilise un fichier GeoJSON (<em>geoFrance.json</em>) pour visualiser les contours d'une zone en France. Les données de saturation sont intégrées dynamiquement pour afficher la congestion.
-                </li>
-                <br>
-                <li>
-                    <strong>Bar Charts et Graphiques Dynamiques</strong><br>
-                    Les fichiers comme <em>modes-de-deplacement.html</em>, <em>deplacements-par-quart-d-heure.html</em> offrent des visualisations interactives : graphiques en barres, lignes, ou même combinaison des deux.  
-                    <br> <br> 
-                    Dans <em>modes-de-deplacement.html</em>, nous avons les fonctionnalités supplémantaires suivantes : 
-                    - Les <span class="gras">fonctions de zoom/brush</span> (mise en œuvre avec <code>d3.brush</code>) permettent de se focaliser sur une plage de catégories ou de données.<br>  
-                    - Un bouton <span class="gras">« Basculer Bar/Line »</span> commute l'affichage entre un bar chart et un line chart, en temps réel.  <br> 
-                    - Un module <span class="gras">DataView</span> (fenêtre modale) autorise l'<span class="gras">édition dynamique</span> des données au format JSON ; le graphique se met alors à jour instantanément.  <br> 
-                    - L'<span class="gras">export d'images</span> se fait directement depuis le <code>svg</code> en <span class="gras">PNG</span> ou en <span class="gras">JPEG</span> (avec un fond blanc).
-                </li>
-                <br> 
-                <li>
-                    <strong>Analyses de Transport et Saturation</strong><br>
-                    Le fichier <em>saturation-des-transports.html</em> mettent en avant la saturation des transports en Île-de-France avec des visualisations exploitant D3.js pour créer des cartes thermiques. Des <span class="gras">curseurs</span> (sliders) ou zones de <span class="gras">brush</span> peuvent être utilisés pour filtrer les données dans le temps.
-                </li>
-                <br>
-                <li>
-                    <strong>Navigation et Footer</strong><br>
-                    L'intergration des fichiers <em>nav.html</em> et <em>footer.html</em> proposent une interface de navigation cohérente reliant les différentes visualisations. L'expérience utilisateur est ainsi unifiée.
-                    L'intergration du fichier <em>nav.html</em> aide à passer aisément d'une vue à une autre.
-                </li>
-            </ol>
-        </section>
-
-        <section>
-            <h2>Technologies Utilisées</h2>
+      <section>
+        <h2>Technologies Utilisées</h2>
+        <ul>
+          <li>
+            <span class="gras">Frameworks et Librairies</span> :
             <ul>
-                <li><span class="gras">Frameworks et Librairies</span> :
-                    <ul>
-                        <li>Bootstrap pour le design responsive.</li>
-                        <li>D3.js pour la création et l'interactivité des graphiques (barre, ligne, brush...).</li>
-                        <li>Leaflet pour la gestion des cartes interactives.</li>
-                        <li><span class="gras">Export d'images</span> via la sérialisation du <code>svg</code> et conversion en <code>canvas</code> (PNG/JPEG).</li>
-                    </ul>
-                </li>
-                <br>
-                <li>
-                    <span class="gras">Données</span> :  
-                    <ul>
-                        <li><em>geoFrance.json</em> (données géographiques pour Leaflet).  
-                            D'autres fichiers JSON internes ou dynamiques (ex. saturations, modes de transport) alimentent certaines visuels.</li>
-                    </ul>                    
-                </li>
-                <br>
-                <li>
-                    <span class="gras">Fonctionnalités avancées</span> :
-                    <ul>
-                        <li><span class="gras">Zoom/Brush</span> : focus dynamique sur une partie du graphe.</li>
-                        <li><span class="gras">DataView (fenêtre modale)</span> : chargement/édition JSON en direct.</li>
-                        <li><span class="gras">Toggles</span> Bar/Line : changer le type de graphique par simple clic.</li>
-                        <li><span class="gras">Export</span> en PNG ou JPEG via un double bouton (ex. <em>Save as PNG</em> / <em>Save as JPEG</em>).</li>
-                    </ul>
-                </li>
+              <li>Bootstrap pour le design responsive.</li>
+              <li>
+                D3.js pour la création et l'interactivité des graphiques (barre,
+                ligne, brush...).
+              </li>
+              <li>Leaflet pour la gestion des cartes interactives.</li>
+              <li>
+                <span class="gras">Export d'images</span> via la sérialisation
+                du <code>svg</code> et conversion en
+                <code>canvas</code> (PNG/JPEG).
+              </li>
             </ul>
-        </section>
-
-        <section>
-            <h2>Résumé</h2>
-            <p>
-                Ce projet illustre l'importance de la <span class="gras">visualisation de données</span> pour des défis de grande ampleur, comme l'organisation des Jeux Olympiques. Les différentes pages (<em>temps-et-distance-de-voyage.html</em>, <em>carte-interactive.html</em>, etc.) démontrent comment <span class="gras">D3.js</span>, <span class="gras">Leaflet</span> et quelques lignes de JavaScript permettent de concevoir une interface riche : carte, graphiques, zoom, et édition des données en temps réel.  
-                Au-delà de la simple consultation, les fonctionnalités comme l'<span class="gras">export en images</span> et la <span class="gras">navigation</span> centralisée (<em>nav.html</em>), <span class="gras">le design responsive</span> visent à faciliter la mise en œuvre pratique pour divers utilisateurs : spectateurs, citoyens, élus, gestionnaires de transport, etc.
-            </p>
-        </section>
-
-        <section>
-            <h2>Sources Utilisées</h2>
+          </li>
+          <br />
+          <li>
+            <span class="gras">Données</span> :
             <ul>
-                <li>
-                    <em>temps-et-distance-de-voyage.html</em>, <em>carte-interactive.html</em>, <em>modes-de-deplacement.html</em>, <em>deplacements-par-quart-d-heure.html</em>, <em>saturation-des-transports.html</em>, <em>apropos.html</em>, <em>index.html</em>, <em>nav.html</em>, 
-                    <em>footer.html</em> 
-                    (HTML et JavaScript pour la datavisualisation, dont <span class="gras">zoom/brush</span>, <span class="gras">DataView</span> et <span class="gras">export en PNG/JPEG</span>). 
-                </li>
-                <li><em>geoFrance.json</em> (Données géographiques pour les cartes).</li>
-                <li><span class="gras">Librairies et dépendances externes</span> :
-                    <ul>
-                        <li><a href="https://d3js.org/" target="_blank">D3.js v7</a> (pour les graphiques et l'interactivité)</li>
-                        <li><a href="https://leafletjs.com/" target="_blank">Leaflet</a> (pour la cartographie interactive)</li>
-                        <li><a href="https://getbootstrap.com/" target="_blank">Bootstrap 5</a> (pour le design responsive)</li>
-                    </ul>
-                </li>
+              <li>
+                <em>geoFrance.json</em> (données géographiques pour Leaflet).
+                D'autres fichiers JSON internes ou dynamiques (ex. saturations,
+                modes de transport) alimentent certaines visuels.
+              </li>
             </ul>
-        </section>
+          </li>
+          <br />
+          <li>
+            <span class="gras">Fonctionnalités avancées</span> :
+            <ul>
+              <li>
+                <span class="gras">Zoom/Brush</span> : focus dynamique sur une
+                partie du graphe.
+              </li>
+              <li>
+                <span class="gras">DataView (fenêtre modale)</span> :
+                chargement/édition JSON en direct.
+              </li>
+              <li>
+                <span class="gras">Toggles</span> Bar/Line : changer le type de
+                graphique par simple clic.
+              </li>
+              <li>
+                <span class="gras">Export</span> en PNG ou JPEG via un double
+                bouton (ex. <em>Save as PNG</em> / <em>Save as JPEG</em>).
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Résumé</h2>
+        <p>
+          Ce projet illustre l'importance de la
+          <span class="gras">visualisation de données</span> pour des défis de
+          grande ampleur, comme l'organisation des Jeux Olympiques. Les
+          différentes pages (<em>temps-et-distance-de-voyage.html</em>,
+          <em>carte-interactive.html</em>, etc.) démontrent comment
+          <span class="gras">D3.js</span>, <span class="gras">Leaflet</span> et
+          quelques lignes de JavaScript permettent de concevoir une interface
+          riche : carte, graphiques, zoom, et édition des données en temps réel.
+          Au-delà de la simple consultation, les fonctionnalités comme l'<span
+            class="gras"
+            >export en images</span
+          >
+          et la <span class="gras">navigation</span> centralisée
+          (<em>nav.html</em>),
+          <span class="gras">le design responsive</span> visent à faciliter la
+          mise en œuvre pratique pour divers utilisateurs : spectateurs,
+          citoyens, élus, gestionnaires de transport, etc.
+        </p>
+      </section>
+
+      <section>
+        <h2>Sources Utilisées</h2>
+        <ul>
+          <li>
+            <em>temps-et-distance-de-voyage.html</em>,
+            <em>carte-interactive.html</em>, <em>modes-de-deplacement.html</em>,
+            <em>deplacements-par-quart-d-heure.html</em>,
+            <em>saturation-des-transports.html</em>, <em>apropos.html</em>,
+            <em>index.html</em>, <em>nav.html</em>,
+            <em>footer.html</em>
+            (HTML et JavaScript pour la datavisualisation, dont
+            <span class="gras">zoom/brush</span>,
+            <span class="gras">DataView</span> et
+            <span class="gras">export en PNG/JPEG</span>).
+          </li>
+          <li>
+            <em>geoFrance.json</em> (Données géographiques pour les cartes).
+          </li>
+          <li>
+            <span class="gras">Librairies et dépendances externes</span> :
+            <ul>
+              <li>
+                <a href="https://d3js.org/" target="_blank">D3.js v7</a> (pour
+                les graphiques et l'interactivité)
+              </li>
+              <li>
+                <a href="https://leafletjs.com/" target="_blank">Leaflet</a>
+                (pour la cartographie interactive)
+              </li>
+              <li>
+                <a href="https://getbootstrap.com/" target="_blank"
+                  >Bootstrap 5</a
+                >
+                (pour le design responsive)
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </section>
     </main>
 
     <!-- SECTION FOOTER -->
@@ -156,7 +255,9 @@
     <script>
       // Charger le footer depuis footer.html
       d3.html("footer.html").then((data) => {
-          document.getElementById("footer-container").appendChild(data.body.firstChild);
+        document
+          .getElementById("footer-container")
+          .appendChild(data.body.firstChild);
       });
     </script>
 
@@ -165,8 +266,10 @@
     <script>
       // Charger la barre de navigation depuis nav.html
       d3.html("nav.html").then((data) => {
-          document.getElementById("navbar-container").appendChild(data.body.firstChild);
+        document
+          .getElementById("navbar-container")
+          .appendChild(data.body.firstChild);
       });
     </script>
-</body>
+  </body>
 </html>

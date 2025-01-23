@@ -1,167 +1,357 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Carte Unique avec GeoJSON et Marqueurs</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Carte Unique avec GeoJSON et Marqueurs</title>
 
-  <!-- Feuilles de style -->
-  <link rel="stylesheet" href="styles.css" />
+    <!-- Feuilles de style -->
+    <link rel="stylesheet" href="styles.css" />
 
-  <!-- Bootstrap CSS -->
-  <link
-    rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-  />
-  
-  <!-- CSS Leaflet -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  />
+    <!-- Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    />
 
-  <style>
-    /* Style pour la carte unique */
-    #map {
-      width: 100%;
-      height: 600px;
-      border: 1px solid #ccc; /* Bordure pour encadrer la carte */
-      margin-top: 1rem;       /* Petit espace en haut de la carte */
-    } 
-  </style>
-</head>
-<body>
+    <!-- CSS Leaflet -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
 
-  <!-- SECTION NAV -->
-  <div id="navbar-container"></div>
+    <style>
+      /* Style pour la carte unique */
+      #map {
+        width: 100%;
+        height: 600px;
+        border: 1px solid #ccc; /* Bordure pour encadrer la carte */
+        margin-top: 1rem; /* Petit espace en haut de la carte */
+      }
+    </style>
+  </head>
+  <body>
+    <!-- SECTION NAV -->
+    <div id="navbar-container"></div>
 
-  <!-- Contenu principal -->
-  <div class="container">
-    <h1 class="mt-4 text-center">Carte Unique avec GeoJSON et Marqueurs</h1>
-    <p class="text-center">
-      Cette carte affiche à la fois les contours d'une zone (GeoJSON)
-      <br />
-      et des marqueurs depuis des données JSON.
-    </p>
+    <!-- Contenu principal -->
+    <div class="container">
+      <h1 class="mt-4 text-center">Carte Unique avec GeoJSON et Marqueurs</h1>
+      <p class="text-center">
+        Cette carte affiche à la fois les contours d'une zone (GeoJSON)
+        <br />
+        et des marqueurs depuis des données JSON.
+      </p>
 
-    <!-- SECTION CARTE UNIQUE -->
-    <div id="map"></div>
-  </div>
+      <!-- SECTION CARTE UNIQUE -->
+      <div id="map"></div>
+    </div>
 
-  <!-- SECTION FOOTER -->
-  <div id="footer-container"></div>
+    <!-- SECTION FOOTER -->
+    <div id="footer-container"></div>
 
-  <script>
-    // Charger la barre de navigation depuis nav.html
-    d3.html("footer.html").then((data) => {
+    <script>
+      // Charger la barre de navigation depuis nav.html
+      d3.html("footer.html").then((data) => {
         // Insérer la navigation dans l'élément avec l'ID "navbar-container"
-        document.getElementById("footer-container").appendChild(data.body.firstChild);
-    });
-  </script>
+        document
+          .getElementById("footer-container")
+          .appendChild(data.body.firstChild);
+      });
+    </script>
 
-  <!-- Scripts nécessaires : Bootstrap, Leaflet, D3 -->
-  <script
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
-  ></script>
-  <script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-  ></script>
-  <script src="https://d3js.org/d3.v7.min.js"></script>
+    <!-- Scripts nécessaires : Bootstrap, Leaflet, D3 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
 
-  <!-- Script principal -->
-  <script>
-    // ------------------------------
-    // CARTE UNIQUE : GeoJSON + Marqueurs
-    // ------------------------------
-    const map = L.map('map').setView([48.8566, 2.3522], 12); // Coordonnées de Paris
+    <!-- Script principal -->
+    <script>
+      // ------------------------------
+      // CARTE UNIQUE : GeoJSON + Marqueurs
+      // ------------------------------
+      const map = L.map("map").setView([48.8566, 2.3522], 12); // Coordonnées de Paris
 
-    // Couche de tuiles OpenStreetMap
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-      maxZoom: 19,
-    }).addTo(map);
+      // Couche de tuiles OpenStreetMap
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        maxZoom: 19,
+      }).addTo(map);
 
-    // ------------------------------
-    // 1) CHARGEMENT DU GEOJSON
-    // ------------------------------
-    const geojsonUrl =
-      "https://gist.githubusercontent.com/selmakoudia03/141a6521f5c408596ef2e3b8f4363bcf/raw/504bb6cc7485e0e3ad4deaaf8c0150fdc37b27c3/gistfile1.txt";
+      // ------------------------------
+      // 1) CHARGEMENT DU GEOJSON
+      // ------------------------------
+      const geojsonUrl =
+        "https://gist.githubusercontent.com/selmakoudia03/141a6521f5c408596ef2e3b8f4363bcf/raw/504bb6cc7485e0e3ad4deaaf8c0150fdc37b27c3/gistfile1.txt";
 
-    fetch(geojsonUrl)
-      .then(response => response.json())
-      .then(data => {
-        L.geoJSON(data, {
-          style: {
-            color: "#ff0000",   // Couleur des contours
-            weight: 2,         // Épaisseur des contours
-            fillColor: "blue", // Couleur de remplissage
-            fillOpacity: 0.3   // Opacité du remplissage
-          }
-        }).addTo(map);
-      })
-      .catch(error => {
-        console.error("Erreur lors du chargement du GeoJSON :", error);
+      fetch(geojsonUrl)
+        .then((response) => response.json())
+        .then((data) => {
+          L.geoJSON(data, {
+            style: {
+              color: "#ff0000", // Couleur des contours
+              weight: 2, // Épaisseur des contours
+              fillColor: "blue", // Couleur de remplissage
+              fillOpacity: 0.3, // Opacité du remplissage
+            },
+          }).addTo(map);
+        })
+        .catch((error) => {
+          console.error("Erreur lors du chargement du GeoJSON :", error);
+        });
+
+      // ------------------------------
+      // 2) AJOUT DES MARQUEURS JSON
+      // ------------------------------
+      const jsonData = [
+        {
+          code_site: "Seine Olympique",
+          entrance_name: "Entrée B5",
+          lat: 48.84994,
+          lon: 2.349536,
+        },
+        {
+          code_site: "Seine Olympique",
+          entrance_name: "Entrée B2",
+          lat: 48.847546,
+          lon: 2.352731,
+        },
+        {
+          code_site: "Seine Olympique",
+          entrance_name: "Entrée F4",
+          lat: 48.857601,
+          lon: 2.317536,
+        },
+        {
+          code_site: "Seine Olympique",
+          entrance_name: "Entrée F5",
+          lat: 48.858425,
+          lon: 2.314623,
+        },
+        {
+          code_site: "Seine Olympique",
+          entrance_name: "Entrée K1",
+          lat: 48.852763,
+          lon: 2.367829,
+        },
+        {
+          code_site: "Seine Olympique",
+          entrance_name: "Entrée L1",
+          lat: 48.856913,
+          lon: 2.353796,
+        },
+        {
+          code_site: "Seine Olympique",
+          entrance_name: "Entrée B3",
+          lat: 48.849573,
+          lon: 2.352893,
+        },
+        {
+          code_site: "Seine Olympique",
+          entrance_name: "Entrée B6",
+          lat: 48.850108,
+          lon: 2.348909,
+        },
+        {
+          code_site: "Seine Olympique",
+          entrance_name: "Entrée E4",
+          lat: 48.856125,
+          lon: 2.325982,
+        },
+        {
+          code_site: "Seine Olympique",
+          entrance_name: "Entrée F2",
+          lat: 48.859087,
+          lon: 2.322727,
+        },
+        {
+          code_site: "Seine Olympique",
+          entrance_name: "Entrée Q2-Q4",
+          lat: 48.868651,
+          lon: 2.309489,
+        },
+        {
+          code_site: "Seine Olympique",
+          entrance_name: "Entrée E2",
+          lat: 48.853887,
+          lon: 2.333333,
+        },
+        {
+          code_site: "Seine Olympique",
+          entrance_name: "Entrée E3",
+          lat: 48.854548,
+          lon: 2.330499,
+        },
+        {
+          code_site: "Seine Olympique",
+          entrance_name: "Entrée H1-H5",
+          lat: 48.857436,
+          lon: 2.310028,
+        },
+        {
+          code_site: "Seine Olympique",
+          entrance_name: "Entrée L2",
+          lat: 48.858022,
+          lon: 2.34963,
+        },
+        {
+          code_site: "Seine Olympique",
+          entrance_name: "Entrée O2",
+          lat: 48.866038,
+          lon: 2.319156,
+        },
+        {
+          code_site: "Seine Olympique",
+          entrance_name: "Entrée Q1",
+          lat: 48.868823,
+          lon: 2.310156,
+        },
+        {
+          code_site: "Seine Olympique",
+          entrance_name: "Entrée B1",
+          lat: 48.847454,
+          lon: 2.353313,
+        },
+        {
+          code_site: "Seine Olympique",
+          entrance_name: "Entrée E1",
+          lat: 48.852978,
+          lon: 2.336987,
+        },
+        {
+          code_site: "Seine Olympique",
+          entrance_name: "Entrée J1",
+          lat: 48.852007,
+          lon: 2.369464,
+        },
+        {
+          code_site: "Seine Olympique",
+          entrance_name: "Entrée O1",
+          lat: 48.866549,
+          lon: 2.328525,
+        },
+        {
+          code_site: "Seine Olympique",
+          entrance_name: "Entrée J2-J4",
+          lat: 48.852521,
+          lon: 2.368059,
+        },
+        {
+          code_site: "Seine Olympique",
+          entrance_name: "Entrée N1",
+          lat: 48.862814,
+          lon: 2.3353,
+        },
+        {
+          code_site: "Seine Olympique",
+          entrance_name: "Entrée R1",
+          lat: 48.871739,
+          lon: 2.300241,
+        },
+        {
+          code_site: "Seine Olympique",
+          entrance_name: "Entrée K2/K3",
+          lat: 48.854576,
+          lon: 2.362663,
+        },
+        {
+          code_site: "Seine Olympique",
+          entrance_name: "Entrée M2",
+          lat: 48.860918,
+          lon: 2.340802,
+        },
+        {
+          code_site: "Seine Olympique",
+          entrance_name: "Entrée P1",
+          lat: 48.866998,
+          lon: 2.31603,
+        },
+        {
+          code_site: "Seine Olympique",
+          entrance_name: "Entrée F3",
+          lat: 48.861227,
+          lon: 2.320677,
+        },
+        {
+          code_site: "Seine Olympique",
+          entrance_name: "Entrée H6-H8",
+          lat: 48.854641,
+          lon: 2.305585,
+        },
+        {
+          code_site: "Seine Olympique",
+          entrance_name: "Entrée R2/R3",
+          lat: 48.872264,
+          lon: 2.299353,
+        },
+        {
+          code_site: "Seine Olympique",
+          entrance_name: "Entrée HDV",
+          lat: 48.857515,
+          lon: 2.351147,
+        },
+        {
+          code_site: "Seine Olympique",
+          entrance_name: "Entrée I1/I2",
+          lat: 48.854299,
+          lon: 2.3054,
+        },
+        {
+          code_site: "Seine Olympique",
+          entrance_name: "Entrée Q5",
+          lat: 48.871795,
+          lon: 2.300954,
+        },
+        {
+          code_site: "Seine Olympique",
+          entrance_name: "Entrée B4",
+          lat: 48.849567,
+          lon: 2.351747,
+        },
+        {
+          code_site: "Seine Olympique",
+          entrance_name: "Entrée F1",
+          lat: 48.858651,
+          lon: 2.323268,
+        },
+        {
+          code_site: "Seine Olympique",
+          entrance_name: "Entrée N2",
+          lat: 48.863764,
+          lon: 2.332073,
+        },
+        {
+          code_site: "Seine Olympique",
+          entrance_name: "Entrée A1",
+          lat: 48.839935,
+          lon: 2.361703,
+        },
+        {
+          code_site: "Seine Olympique",
+          entrance_name: "Entrée M1",
+          lat: 48.85875,
+          lon: 2.347408,
+        },
+      ];
+
+      // Ajout des marqueurs à la même carte
+      jsonData.forEach((entry) => {
+        L.marker([entry.lat, entry.lon])
+          .bindPopup(
+            `<b>${entry.entrance_name}</b><br>Latitude: ${entry.lat}<br>Longitude: ${entry.lon}`
+          )
+          .addTo(map);
       });
 
-    // ------------------------------
-    // 2) AJOUT DES MARQUEURS JSON
-    // ------------------------------
-    const jsonData = [
-      {"code_site": "Seine Olympique", "entrance_name": "Entrée B5", "lat": 48.84994, "lon": 2.349536},
-      {"code_site": "Seine Olympique", "entrance_name": "Entrée B2", "lat": 48.847546, "lon": 2.352731},
-      {"code_site": "Seine Olympique", "entrance_name": "Entrée F4", "lat": 48.857601, "lon": 2.317536},
-      {"code_site": "Seine Olympique", "entrance_name": "Entrée F5", "lat": 48.858425, "lon": 2.314623},
-      {"code_site": "Seine Olympique", "entrance_name": "Entrée K1", "lat": 48.852763, "lon": 2.367829},
-      {"code_site": "Seine Olympique", "entrance_name": "Entrée L1", "lat": 48.856913, "lon": 2.353796},
-      {"code_site": "Seine Olympique", "entrance_name": "Entrée B3", "lat": 48.849573, "lon": 2.352893},
-      {"code_site": "Seine Olympique", "entrance_name": "Entrée B6", "lat": 48.850108, "lon": 2.348909},
-      {"code_site": "Seine Olympique", "entrance_name": "Entrée E4", "lat": 48.856125, "lon": 2.325982},
-      {"code_site": "Seine Olympique", "entrance_name": "Entrée F2", "lat": 48.859087, "lon": 2.322727},
-      {"code_site": "Seine Olympique", "entrance_name": "Entrée Q2-Q4", "lat": 48.868651, "lon": 2.309489},
-      {"code_site": "Seine Olympique", "entrance_name": "Entrée E2", "lat": 48.853887, "lon": 2.333333},
-      {"code_site": "Seine Olympique", "entrance_name": "Entrée E3", "lat": 48.854548, "lon": 2.330499},
-      {"code_site": "Seine Olympique", "entrance_name": "Entrée H1-H5", "lat": 48.857436, "lon": 2.310028},
-      {"code_site": "Seine Olympique", "entrance_name": "Entrée L2", "lat": 48.858022, "lon": 2.34963},
-      {"code_site": "Seine Olympique", "entrance_name": "Entrée O2", "lat": 48.866038, "lon": 2.319156},
-      {"code_site": "Seine Olympique", "entrance_name": "Entrée Q1", "lat": 48.868823, "lon": 2.310156},
-      {"code_site": "Seine Olympique", "entrance_name": "Entrée B1", "lat": 48.847454, "lon": 2.353313},
-      {"code_site": "Seine Olympique", "entrance_name": "Entrée E1", "lat": 48.852978, "lon": 2.336987},
-      {"code_site": "Seine Olympique", "entrance_name": "Entrée J1", "lat": 48.852007, "lon": 2.369464},
-      {"code_site": "Seine Olympique", "entrance_name": "Entrée O1", "lat": 48.866549, "lon": 2.328525},
-      {"code_site": "Seine Olympique", "entrance_name": "Entrée J2-J4", "lat": 48.852521, "lon": 2.368059},
-      {"code_site": "Seine Olympique", "entrance_name": "Entrée N1", "lat": 48.862814, "lon": 2.3353},
-      {"code_site": "Seine Olympique", "entrance_name": "Entrée R1", "lat": 48.871739, "lon": 2.300241},
-      {"code_site": "Seine Olympique", "entrance_name": "Entrée K2/K3", "lat": 48.854576, "lon": 2.362663},
-      {"code_site": "Seine Olympique", "entrance_name": "Entrée M2", "lat": 48.860918, "lon": 2.340802},
-      {"code_site": "Seine Olympique", "entrance_name": "Entrée P1", "lat": 48.866998, "lon": 2.31603},
-      {"code_site": "Seine Olympique", "entrance_name": "Entrée F3", "lat": 48.861227, "lon": 2.320677},
-      {"code_site": "Seine Olympique", "entrance_name": "Entrée H6-H8", "lat": 48.854641, "lon": 2.305585},
-      {"code_site": "Seine Olympique", "entrance_name": "Entrée R2/R3", "lat": 48.872264, "lon": 2.299353},
-      {"code_site": "Seine Olympique", "entrance_name": "Entrée HDV", "lat": 48.857515, "lon": 2.351147},
-      {"code_site": "Seine Olympique", "entrance_name": "Entrée I1/I2", "lat": 48.854299, "lon": 2.3054},
-      {"code_site": "Seine Olympique", "entrance_name": "Entrée Q5", "lat": 48.871795, "lon": 2.300954},
-      {"code_site": "Seine Olympique", "entrance_name": "Entrée B4", "lat": 48.849567, "lon": 2.351747},
-      {"code_site": "Seine Olympique", "entrance_name": "Entrée F1", "lat": 48.858651, "lon": 2.323268},
-      {"code_site": "Seine Olympique", "entrance_name": "Entrée N2", "lat": 48.863764, "lon": 2.332073},
-      {"code_site": "Seine Olympique", "entrance_name": "Entrée A1", "lat": 48.839935, "lon": 2.361703},
-      {"code_site": "Seine Olympique", "entrance_name": "Entrée M1", "lat": 48.85875, "lon": 2.347408}
-    ];
-
-    // Ajout des marqueurs à la même carte
-    jsonData.forEach(entry => {
-      L.marker([entry.lat, entry.lon])
-        .bindPopup(`<b>${entry.entrance_name}</b><br>Latitude: ${entry.lat}<br>Longitude: ${entry.lon}`)
-        .addTo(map);
-    });
-
-
-    // ------------------------------
-    // CHARGER LA BARRE DE NAVIGATION
-    // ------------------------------
-    d3.html("nav.html").then((data) => {
-      document.getElementById("navbar-container").appendChild(data.body.firstChild);
-    });
-  </script>
-</body>
+      // ------------------------------
+      // CHARGER LA BARRE DE NAVIGATION
+      // ------------------------------
+      d3.html("nav.html").then((data) => {
+        document
+          .getElementById("navbar-container")
+          .appendChild(data.body.firstChild);
+      });
+    </script>
+  </body>
 </html>
